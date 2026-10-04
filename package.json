@@ -12,7 +12,8 @@
     "start": "node .output/server/index.mjs",
     "postinstall": "nuxt prepare",
     "test": "vitest run",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "review": "bash scripts/review.sh"
   },
   "dependencies": {
     "graphql": "^16.14.2",
