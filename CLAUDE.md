@@ -23,6 +23,7 @@ If the original does something, this does the same thing, quirks included.
 npm run dev        # localhost:3000, API and GraphiQL at /graphql
 npm test           # Vitest
 npm run typecheck  # vue-tsc
+npm run review 12  # review PR 12 with your local Claude, posted as a PR comment
 npm run build && node .output/server/index.mjs   # what Render runs
 ```
 
