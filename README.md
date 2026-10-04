@@ -41,6 +41,27 @@ npm run typecheck
 The tests build the API against a throwaway database and read top to bottom as a
 tour of every query and both mutations.
 
+## Review it
+
+Pull requests are reviewed by Claude, locally, so no Claude token is stored on
+GitHub. In Claude Code, run:
+
+```
+/code-review 12 --comment
+```
+
+That reviews PR 12 and posts the findings on it. `/code-review` is built into
+Claude Code, so there are no skill files here. The repo supplies only the rules,
+in [CLAUDE.md](CLAUDE.md): review changed code only, no broad refactors, findings
+ranked most severe first, and any drift from the original counts as a bug.
+
+[.github/workflows/review.yml](.github/workflows/review.yml) does the same review
+in GitHub Actions. It is manual only for now. To run it on every pull request,
+add a `CLAUDE_CODE_OAUTH_TOKEN` secret and switch its trigger to `pull_request`.
+
+`package-lock.json` is marked generated in `.gitattributes`, so it shows as one
+line in diffs and reviews read only real code.
+
 ## Deploy it
 
 `render.yaml` is a Render Blueprint for one Node web service. In Render, choose
@@ -60,6 +81,12 @@ server/routes/graphql.ts  mounts the API at /graphql (app.py)
 server/plugins/db.ts   creates and seeds the database on boot (app.py)
 tests/api.test.ts      the API tour (test_api.py)
 render.yaml            Render Blueprint (Dockerfile)
+
+pages/index.vue        the board, filter state, pass the ball flow (App.tsx)
+components/            BoardFilter, ContractCard, PassBallModal, HandoffTimeline,
+                       KindBadge and StakeholderAvatar (components/*.tsx)
+lib/                   types.ts, api.ts and format.ts, carried over unchanged
+assets/styles.css      the original stylesheet, one selector renamed
 ```
 
 ## What changed from the original, and why
@@ -77,7 +104,40 @@ underneath.
 | `DATABASE_URL`, Postgres optional | `DATABASE_PATH`, SQLite only | The brief was SQLite. The Postgres path was never exercised in the original |
 | Timestamps with microseconds | Timestamps with milliseconds, padded | JavaScript dates stop at milliseconds |
 
+On the front end, `types.ts`, `api.ts` and `format.ts` are copied across with
+only comments touched, and the stylesheet changes one selector, `#root` to
+`#__nuxt`. The single copy change is the error banner's hint, which now says
+`npm run dev` instead of `python app.py`, since there is no Python here.
+
 Kept on purpose, quirks included: resolvers still build the whole object graph,
 so the N+1 queries the original's README calls out are still here. Statuses and
 kinds are still plain strings. There is still no authentication, and GraphiQL is
 still public.
+
+## React vs Vue, side by side
+
+The same screens, so the differences are all in how the components say it.
+
+| Concern | React original | Vue port |
+| --- | --- | --- |
+| Local state | `useState`, set through a setter | `ref`, assigned directly with `.value` in script and bare in the template |
+| Derived values | `useMemo` with a dependency array | `computed`, which tracks its own dependencies |
+| Loading on mount | `useEffect(() => load(), [])` | `onMounted(load)` |
+| Listeners with cleanup | returned from `useEffect` | paired `onMounted` and `onUnmounted` |
+| Conditionals and lists | `&&`, ternaries and `.map()` in JSX | `v-if`, `v-else` and `v-for` in the template |
+| Child to parent | callback props (`onPassBall`, `onClose`) | emits (`@pass-ball`, `@close`) |
+| Two way binding | `value` plus `onChange` on every field | `v-model`, and `defineModel` for the filter tiles |
+| Async callback the child awaits | `onSubmit` prop returning a promise | still a function prop, `submit`, because an emit cannot hand back a promise |
+| Refs to DOM nodes | `useRef` | a template `ref` with the same name as a `ref()` |
+| Sharing a constant from a component file | a named export next to the component | a second, plain `<script>` block, since `<script setup>` cannot export |
+| Styling | one global stylesheet | the same stylesheet, loaded through `css` in `nuxt.config.ts` |
+
+Two things look the same but work differently. React rerenders the whole
+component and diffs the output, so `byAttention` and the tile counts rerun on
+every render unless memoized. Vue tracks which refs each `computed` read and only
+recomputes when one changes, so there is no dependency array to get wrong.
+
+And the board is fetched in the browser after mount, exactly as before, rather
+than during server rendering. Nuxt could render it on the server, but the due
+and "days ago" labels are worked out against the viewer's clock, and a server
+in another timezone would print a different day than the browser then hydrates.
