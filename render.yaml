@@ -1,0 +1,19 @@
+# Render Blueprint: one Node web service serving the Vue pages, the GraphQL API
+# and GraphiQL on a single port, like the original's Docker image.
+#
+# The SQLite file lives on the instance's ephemeral disk, so every deploy or
+# restart boots onto a freshly seeded board. The original's container behaved
+# the same way.
+services:
+  - type: web
+    name: whos-got-the-ball-nuxt
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_PATH
+        value: .data/ball.db

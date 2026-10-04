@@ -1,7 +1,7 @@
 name: Claude review
 
-# Manual only. Reviews run locally with `npm run review <pr>`, so no Claude
-# token is stored on GitHub. To review in CI instead, add the
+# Manual only. Reviews run locally with `/code-review <pr> --comment` in
+# Claude Code, so no Claude token is stored on GitHub. To review in CI instead, add the
 # CLAUDE_CODE_OAUTH_TOKEN secret and switch the trigger to pull_request.
 on:
   workflow_dispatch:
