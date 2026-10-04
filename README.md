@@ -41,6 +41,27 @@ npm run typecheck
 The tests build the API against a throwaway database and read top to bottom as a
 tour of every query and both mutations.
 
+## Review it
+
+Pull requests are reviewed by Claude, locally, so no Claude token is stored on
+GitHub. In Claude Code, run:
+
+```
+/code-review 12 --comment
+```
+
+That reviews PR 12 and posts the findings on it. `/code-review` is built into
+Claude Code, so there are no skill files here. The repo supplies only the rules,
+in [CLAUDE.md](CLAUDE.md): review changed code only, no broad refactors, findings
+ranked most severe first, and any drift from the original counts as a bug.
+
+[.github/workflows/review.yml](.github/workflows/review.yml) does the same review
+in GitHub Actions. It is manual only for now. To run it on every pull request,
+add a `CLAUDE_CODE_OAUTH_TOKEN` secret and switch its trigger to `pull_request`.
+
+`package-lock.json` is marked generated in `.gitattributes`, so it shows as one
+line in diffs and reviews read only real code.
+
 ## Deploy it
 
 `render.yaml` is a Render Blueprint for one Node web service. In Render, choose
