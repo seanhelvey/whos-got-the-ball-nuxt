@@ -20,7 +20,8 @@ review="$({
   gh pr view "$pr" --comments
   echo
   echo "## Diff"
-  gh pr diff "$pr"
+  # The lockfile is most of any dependency change and says nothing reviewable.
+  gh pr diff "$pr" --exclude package-lock.json --exclude "*.png"
 } | "$claude" -p --max-turns 5)"
 
 if [[ -z "${review//[[:space:]]/}" ]]; then
