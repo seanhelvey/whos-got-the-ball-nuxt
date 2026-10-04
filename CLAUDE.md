@@ -17,13 +17,17 @@ If the original does something, this does the same thing, quirks included.
 - **Parity is a bug class.** A difference from the original in the schema, the
   tables, the seed data, or what a screen shows is a finding.
 
+## Reviewing locally
+
+In Claude Code, `/code-review 12 --comment` reviews PR 12 by the rules above
+and posts the findings on the PR.
+
 ## Commands
 
 ```bash
 npm run dev        # localhost:3000, API and GraphiQL at /graphql
 npm test           # Vitest
 npm run typecheck  # vue-tsc
-npm run review 12  # review PR 12 with your local Claude, posted as a PR comment
 npm run build && node .output/server/index.mjs   # what Render runs
 ```
 
